@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_vegetable"
+            android:title="@string/menu_vegetable_label" />
+        <item
+            android:id="@+id/nav_meat"
+            android:title="@string/menu_meat_label" />
+        <item
+            android:id="@+id/nav_spice"
+            android:title="@string/menu_spice_label" />
+        <item
+            android:id="@+id/nav_drink"
+            android:title="@string/menu_drink_label" />
+        <item
+            android:id="@+id/nav_bento"
+            android:title="@string/menu_bento_label" />
+    </group>
+</menu>
