@@ -7,22 +7,32 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-open class FavoriteFood (foodIdFirebase: String, name: String, description: String, price: String, image: String): RealmObject{
+open class FavoriteFood(
+    foodIdFirebase: String,
+    name: String,
+    description: String,
+    price: String,
+    image: String,
+    genre: Int
+) : RealmObject {
     @PrimaryKey
     var foodIdFirebase: String = ""
     var image: String = ""
     var name: String = ""
     var description: String = ""
     var price: String = ""
+    var genre: Int = 0
+
     init {
         this.foodIdFirebase = foodIdFirebase
         this.name = name
         this.image = image
         this.description = description
         this.price = price
+        this.genre = genre
     }
 
-    constructor() : this("", "", "", "","")
+    constructor() : this("", "", "", "", "", 0)
 
     companion object {
         /**
@@ -30,13 +40,23 @@ open class FavoriteFood (foodIdFirebase: String, name: String, description: Stri
          */
         fun findAll(): List<FavoriteFood> {
             // Realmデータベースとの接続を開く
-            val config = RealmConfiguration.create(schema = setOf(FavoriteFood::class))
+            val config =
+                RealmConfiguration.create(schema = setOf(FavoriteFood::class, CartFood::class))
             val realm = Realm.open(config)
 
             // Realmデータベースからお気に入り情報を取得
             // mapでディープコピーしてresultに代入する
             val result = realm.query<FavoriteFood>().find()
-                .map { FavoriteFood(it.foodIdFirebase, it.name, it.description, it.price, it.image) }
+                .map {
+                    FavoriteFood(
+                        it.foodIdFirebase,
+                        it.name,
+                        it.description,
+                        it.price,
+                        it.image,
+                        it.genre
+                    )
+                }
 
             // Realmデータベースとの接続を閉じる
             realm.close()
@@ -50,8 +70,8 @@ open class FavoriteFood (foodIdFirebase: String, name: String, description: Stri
          */
         fun findBy(foodId: String): FavoriteFood? {
             // Realmデータベースとの接続を開く
-            val config = RealmConfiguration.create(schema = setOf(FavoriteFood::class))
-            Log.d("TEST","HIII")
+            val config =
+                RealmConfiguration.create(schema = setOf(FavoriteFood::class, CartFood::class))
             val realm = Realm.open(config)
 
             val result = realm.query<FavoriteFood>("foodIdFirebase=='$foodId'").first().find()
@@ -67,7 +87,8 @@ open class FavoriteFood (foodIdFirebase: String, name: String, description: Stri
          */
         fun insert(favoriteShop: FavoriteFood) {
             // Realmデータベースとの接続を開く
-            val config = RealmConfiguration.create(schema = setOf(FavoriteFood::class))
+            val config =
+                RealmConfiguration.create(schema = setOf(FavoriteFood::class, CartFood::class))
             val realm = Realm.open(config)
 
             // 登録処理
@@ -84,12 +105,13 @@ open class FavoriteFood (foodIdFirebase: String, name: String, description: Stri
          */
         fun delete(id: String) {
             // Realmデータベースとの接続を開く
-            val config = RealmConfiguration.create(schema = setOf(FavoriteFood::class))
+            val config =
+                RealmConfiguration.create(schema = setOf(FavoriteFood::class, CartFood::class))
             val realm = Realm.open(config)
 
             // 削除処理
             realm.writeBlocking {
-                val favoriteShops = query<FavoriteFood>("id=='$id'").find()
+                val favoriteShops = query<FavoriteFood>("foodIdFirebase=='$id'").find()
                 favoriteShops.forEach {
                     delete(it)
                 }

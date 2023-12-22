@@ -1,24 +1,30 @@
 package jp.techacademy.huyen.duong.shop_app
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle // 追加
 import androidx.core.view.GravityCompat // 追加
+import androidx.core.view.isVisible
+import androidx.core.view.marginTop
 import com.google.android.material.navigation.NavigationView // 追加
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.huyen.duong.shop_app.databinding.ActivityMainBinding
+import jp.techacademy.huyen.duong.shop_app.realm.CartFood
+import jp.techacademy.huyen.duong.shop_app.realm.FavoriteFood
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
+    OnIncrementListener {
     private lateinit var binding: ActivityMainBinding
 
     private var genre = 0  // 追加
@@ -27,9 +33,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     // ----- 追加:ここから -----
     private lateinit var databaseReference: DatabaseReference
     private lateinit var foodArrayList: ArrayList<Food>
+    private lateinit var cartArrayList: ArrayList<CartFood>
+    private lateinit var orderArrayList: ArrayList<Order>
     private lateinit var adapter: DasboardListAdapter
-
     private var genreRef: DatabaseReference? = null
+    private var keySearch = ""
+    private var numberCarts = 0
+
     //異なるActivity間で通信
     var resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -37,12 +47,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (result.resultCode == RESULT_OK) {
             val intent = result.data
             if (intent != null) {
-                val res = intent.getStringExtra(KEY_RESULT).toString()
+                val res = intent.getStringExtra(KEY_RESULT_ORDER).toString()
                 if (res == "OK") {
-                    genre = 1
-                    //val navigationView = findViewById<NavigationView>(R.id.nav_view)
-
-                    //onNavigationItemSelected(navigationView.menu.getItem(0))
+                    cartArrayList.clear()
+                    adapter.notifyDataSetChanged()
+                }
+                val resOk = intent.getStringExtra(KEY_RESULT).toString()
+                if (resOk == "OK") {
+                    binding.content.btnBuy.isVisible = false
+                    cartArrayList.clear()
+                    adapter.notifyDataSetChanged()
+                }
+                val resDetail = intent.getStringExtra(KEY_DETAIL).toString()
+                if (resDetail == "OK") {
+                    adapter.notifyDataSetChanged()
                 }
             }
         }
@@ -51,43 +69,49 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val eventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
             val map = dataSnapshot.value as Map<*, *>
-            //val favoriteStatus = map["favoriteStatus"] as? String ?: "0"
-            //Log.d("FavoriteMain",""+favoriteStatus)
             val name = map["name"] as? String ?: ""
-            val description = map["description"] as? String ?: ""
-            val prices = map["price"] as? String ?: ""
-            val imageString = map["image"] as? String ?: ""
-            val bytes =
-                if (imageString.isNotEmpty()) {
+            if (name.contains(keySearch)) {
+                val description = map["description"] as? String ?: ""
+                val prices = map["price"] as? String ?: ""
+                val imageString = map["image"] as? String ?: ""
+                val bytes = if (imageString.isNotEmpty()) {
                     Base64.decode(imageString, Base64.DEFAULT)
                 } else {
                     byteArrayOf()
                 }
 
-            val commentArrayList = ArrayList<Comment>()
-            val answerMap = map["comments"] as Map<*, *>?
-            if (answerMap != null) {
-                for (key in answerMap.keys) {
-                    val map1 = answerMap[key] as Map<*, *>
-                    val map1Body = map1["body"] as? String ?: ""
-                    val map1Uid = map1["uid"] as? String ?: ""
-                    val map1CommentUid = key as? String ?: ""
-                    val imageStringComment = map["image"] as? String ?: ""
-                    val byte =
-                        if (imageStringComment.isNotEmpty()) {
+                val commentArrayList = ArrayList<Comment>()
+                val answerMap = map["comments"] as Map<*, *>?
+                if (answerMap != null) {
+                    for (key in answerMap.keys) {
+                        val map1 = answerMap[key] as Map<*, *>
+                        val map1Body = map1["body"] as? String ?: ""
+                        val map1Uid = map1["uid"] as? String ?: ""
+                        val map1CommentUid = key as? String ?: ""
+                        val imageStringComment = map["image"] as? String ?: ""
+                        val byte = if (imageStringComment.isNotEmpty()) {
                             Base64.decode(imageStringComment, Base64.DEFAULT)
                         } else {
                             byteArrayOf()
                         }
-
-                    val comment = Comment(map1Uid, map1Body, byte)
-                    commentArrayList.add(comment)
+                        val date = map1["date"] as? String ?: ""
+                        val comment = Comment(map1Uid, map1Body, byte, date, map1CommentUid)
+                        commentArrayList.add(comment)
+                    }
                 }
-            }
 
-            val food = Food(dataSnapshot.key ?: "",name,description, prices,genre, bytes, commentArrayList)
-            foodArrayList.add(food)
-            adapter.notifyDataSetChanged()
+                val food = Food(
+                    dataSnapshot.key ?: "",
+                    name,
+                    description,
+                    prices,
+                    genre,
+                    bytes,
+                    commentArrayList
+                )
+                foodArrayList.add(food)
+                adapter.notifyDataSetChanged()
+            }
         }
 
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
@@ -106,14 +130,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             val map1Uid = map1["uid"] as? String ?: ""
                             val map1CommentUid = key as? String ?: ""
                             val imageStringComment = map["image"] as? String ?: ""
-                            val byte =
-                                if (imageStringComment.isNotEmpty()) {
-                                    Base64.decode(imageStringComment, Base64.DEFAULT)
-                                } else {
-                                    byteArrayOf()
-                                }
-
-                            val comment = Comment(map1Uid, map1Body, byte)
+                            val byte = if (imageStringComment.isNotEmpty()) {
+                                Base64.decode(imageStringComment, Base64.DEFAULT)
+                            } else {
+                                byteArrayOf()
+                            }
+                            val date = map1["date"] as? String ?: ""
+                            val comment =
+                                Comment(map1Uid, map1Body, byte, date = date, map1CommentUid)
                             food.comments.add(comment)
                         }
                     }
@@ -128,38 +152,56 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         override fun onCancelled(p0: DatabaseError) {}
     }
 
+    private val eventListenerOrder = object : ChildEventListener {
+        override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+            val user = FirebaseAuth.getInstance().currentUser
+            val map = dataSnapshot.value as Map<*, *>
+            val name = map["name"] as? String ?: ""
+            val address = map["address"] as? String ?: ""
+            val date = map["date"] as? String ?: ""
+            val foods = map["foods"] as? String ?: ""
+            val prices = map["prices"] as? String ?: ""
+            val phone = map["phone"] as? String ?: ""
+            val payment = map["payment"] as? String ?: ""
+            val cardNumber = map["cardNumber"] as? String ?: ""
+            val cardPasswod = map["cardPassword"] as? String ?: ""
+            val order = Order(
+                dataSnapshot.key ?: "",
+                uid = user!!.uid,
+                address,
+                date = date,
+                prices = prices,
+                foods = foods,
+                payment = payment,
+                cardName = cardNumber,
+                cardPass = cardPasswod,
+                phone = phone
+            )
+            orderArrayList.add(order)
+            adapter.notifyDataSetChanged()
+        }
+
+        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
+        }
+
+        override fun onChildRemoved(p0: DataSnapshot) {}
+        override fun onChildMoved(p0: DataSnapshot, p1: String?) {}
+        override fun onCancelled(p0: DatabaseError) {}
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setSupportActionBar(binding.content.toolbar)
+        binding.content.inner.RLSearch.isVisible = false
 
         val user = FirebaseAuth.getInstance().currentUser
         binding.navView.menu.getItem(4).setVisible(false)
         if (user != null) {
             binding.navView.menu.getItem(4).setVisible(true)
-        }
-        binding.content.fab.setOnClickListener {
-            // ジャンルを選択していない場合はメッセージを表示するだけ
-            Log.d("Genre",""+genre)
-            if (genre == 0) {
-                Snackbar.make(it, getString(R.string.food_no_select_genre), Snackbar.LENGTH_LONG).show()
-                return@setOnClickListener
-            }
-            // ログイン済みのユーザーを取得する
-            val user = FirebaseAuth.getInstance().currentUser
-
-            // ログインしていなければログイン画面に遷移させる
-            if (user == null) {
-                val intent = Intent(applicationContext, LoginActivity::class.java)
-                startActivity(intent)
-            } else {
-                // ジャンルを渡して質問作成画面を起動する
-                val intent = Intent(applicationContext, FoodSendActivity::class.java)
-                intent.putExtra("genre", genre)
-                startActivity(intent)
-            }
         }
 
         // ----- 追加:ここから
@@ -172,9 +214,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.string.app_name
         )
         binding.drawerLayout.addDrawerListener(toggle)
+        binding.content.btnBuy.isVisible = false
         toggle.syncState()
 
         binding.navView.setNavigationItemSelectedListener(this)
+        binding.content.btnBuy.isVisible = false
         // ----- 追加:ここまで
         // ----- List Question -----
         // Firebase
@@ -182,17 +226,39 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // ListViewの準備
         adapter = DasboardListAdapter(this)
+        adapter.setOnIncrementListener(this)
         foodArrayList = ArrayList()
+        cartArrayList = ArrayList()
+        orderArrayList = ArrayList()
+        //adapter.setOnIncrementListener(this)
         adapter.notifyDataSetChanged()
-        // ----- 追加:ここまで -----
-        // ----- 追加:ここから onclick Item to view detail question-----
-//        binding.content.inner.listView.setOnItemClickListener { _, _, position, _ ->
-//            // Questionのインスタンスを渡して質問詳細画面を起動する
-//            val intent = Intent(applicationContext, QuestionDetailActivity::class.java)
-//            intent.putExtra("question", questionArrayList[position])
-//            startActivity(intent)
-//        }
-        // ----- 追加:ここまで -----
+
+        if (cartArrayList.size > 0) {
+            binding.content.btnBuy.isVisible = true
+        }
+        binding.content.inner.txtTextview.isVisible = false
+        binding.content.inner.etSearch.setOnClickListener() {
+            // キーボードが出てたら閉じる
+            val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            im.hideSoftInputFromWindow(it.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
+            keySearch = binding.content.inner.etSearch.text.toString()
+            // 選択したジャンルにリスナーを登録する
+            if (genreRef != null) {
+                genreRef!!.removeEventListener(eventListener)
+            }
+            foodArrayList.clear()
+            genreRef = databaseReference.child(FoodsPATH).child(genre.toString())
+            genreRef!!.addChildEventListener(eventListener)
+        }
+        binding.content.inner.listView.setOnItemClickListener() { _, _, position, _ ->
+            // Questionのインスタンスを渡して質問詳細画面を起動する
+            if (genre < 6) {
+                val intent = Intent(applicationContext, FoodDetailActivity::class.java)
+                intent.putExtra("food", foodArrayList[position])
+                intent.putExtra("genre", genre)
+                resultLauncher.launch(intent)
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -215,12 +281,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         return super.onOptionsItemSelected(item)
     }
+
     override fun onResume() {
         super.onResume()
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
 
         // 1:趣味を既定の選択とする
-        if(genre == 0) {
+        if (genre == 0) {
             onNavigationItemSelected(navigationView.menu.getItem(0))
         }
         val user = FirebaseAuth.getInstance().currentUser
@@ -232,12 +299,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     // ----- 追加:ここから
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        var user = FirebaseAuth.getInstance().currentUser
         when (item.itemId) {
             R.id.nav_vegetable -> {
                 binding.content.toolbar.title = getString(R.string.menu_vegetable_label)
                 genre = 1
             }
-            R.id.nav_meat-> {
+            R.id.nav_meat -> {
                 binding.content.toolbar.title = getString(R.string.menu_meat_label)
                 genre = 2
             }
@@ -253,13 +321,40 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 binding.content.toolbar.title = getString(R.string.menu_bento_label)
                 genre = 5
             }
+            R.id.nav_cart -> {
+                if (user == null) {
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    binding.content.toolbar.title = getString(R.string.menu_cart_label)
+                    genre = 6
+                }
+            }
+            R.id.nav_favorite -> {
+                if (user == null) {
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    binding.content.toolbar.title = getString(R.string.menu_favorite_label)
+                    genre = 7
+                }
+            }
+            R.id.nav_bought -> {
+                if (user == null) {
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    binding.content.toolbar.title = getString(R.string.menu_bought_label)
+                    genre = 8
+                }
+            }
         }
 
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         // ----- 追加:ここから -----
         // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
         foodArrayList.clear()
-        adapter.setFoodArrayList(foodArrayList)
+        adapter.setFoodArrayList(foodArrayList, genre, arrayListOf(),orderArrayList)
         binding.content.inner.listView.adapter = adapter
 
         // 選択したジャンルにリスナーを登録する
@@ -267,11 +362,114 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             genreRef!!.removeEventListener(eventListener)
         }
         if (genre < 6) {
+            keySearch = ""
+//            binding.content.fab.isVisible = true
+            binding.content.inner.RLSearch.isVisible = true
+            binding.content.inner.txtTextview.isVisible = false
             genreRef = databaseReference.child(FoodsPATH).child(genre.toString())
             genreRef!!.addChildEventListener(eventListener)
         }
+        if (genre > 5) {
+//            binding.content.fab.isVisible = false
+            binding.content.inner.RLSearch.isVisible = false
+        }
         // ----- 追加:ここまで -----
+        if (genre == 7) {
+            var foodFavorite = FavoriteFood.findAll()
+            if (foodFavorite != null) {
+                foodArrayList.clear()
+                foodFavorite.forEach {
+                    var id = it.foodIdFirebase
+                    var name = it.name
+                    var description = it.description
+                    var price = it.price
+                    var image = it.image
+                    var g = it.genre
+                    val byte = if (image.isNotEmpty()) {
+                        Base64.decode(image, Base64.DEFAULT)
+                    } else {
+                        byteArrayOf()
+                    }
+
+                    var f = Food(id, name, description, price, g, byte, arrayListOf())
+                    foodArrayList.add(f)
+                }
+                adapter.setFoodArrayList(foodArrayList, genre, arrayListOf(),orderArrayList)
+                adapter.notifyDataSetChanged()
+            }
+        }
+        if (genre != 6) {
+            binding.content.btnBuy.isVisible = false
+        }
+        if (genre == 8) {
+//            keySearch = ""
+//            binding.content.fab.isVisible = true
+//            binding.content.inner.RLSearch.isVisible = true
+            if (user != null) {
+                genreRef = databaseReference.child(OrdersPATH).child(user.uid)
+                genreRef!!.addChildEventListener(eventListenerOrder)
+            }
+        }
+        if (genre == 6) {
+            binding.content.inner.txtTextview.isVisible = true
+            binding.content.btnBuy.isVisible = true
+            var foodCart = CartFood.findAll()
+            if (foodCart != null) {
+                foodArrayList.clear()
+                cartArrayList.clear()
+                foodCart.forEach {
+                    var id = it.foodIdFirebase
+                    var name = it.name
+                    var description = it.description
+                    var price = it.price
+                    var image = it.image
+                    var g = it.genre
+                    val byte = if (image.isNotEmpty()) {
+                        Base64.decode(image, Base64.DEFAULT)
+                    } else {
+                        byteArrayOf()
+                    }
+                    var num = it.number
+
+                    var f = Food(id, name, description, price, g, byte, arrayListOf())
+                    foodArrayList.add(f)
+                    cartArrayList.add(it)
+                }
+                numberCarts = cartArrayList.size
+                adapter.setFoodArrayList(foodArrayList, genre, cartArrayList, orderArrayList)
+                adapter.notifyDataSetChanged()
+            }
+            var prices = 0.0
+            for (i in cartArrayList) {
+                prices += i.number * (i.price.toDouble())
+            }
+            binding.content.btnBuy.setOnClickListener() {
+                val intent = Intent(this, OrderActivity::class.java)
+                intent.putExtra(
+                    KEY_PRICE,
+                    prices
+                )
+                intent.putExtra(KEY_CART, cartArrayList)
+                resultLauncher.launch(intent)
+            }
+            if (cartArrayList.size < 1) {
+                binding.content.btnBuy.isVisible = false
+            } else {
+                binding.content.btnBuy.isVisible = true
+            }
+        }
         return true
+    }
+
+    override fun onNumberIncremented() {
+        numberCarts -= 1
+        if (numberCarts < 1) {
+            binding.content.btnBuy.isVisible = false
+        }
     }
     // ----- 追加:ここまで
 }
+
+const val KEY_CART = "key_cart"
+const val KEY_PRICE = "key_price"
+const val KEY_DETAIL = "key_detail"

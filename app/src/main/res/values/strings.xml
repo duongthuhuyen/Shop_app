@@ -17,6 +17,8 @@
     <string name="login_create_button_text">アカウント作成</string>
 
     <string name="login_title">ログイン</string>
+    <string name="create_account_title">アカウント登録</string>
+    <string name="order_title">注文</string>
     <string name="create_account_failure_message">アカウント作成に失敗しました</string>
     <string name="login_failure_message">ログインに失敗しました</string>
     <string name="login_error_message">正しく入力してください</string>
@@ -38,6 +40,9 @@
     <string name="menu_meat_label">肉</string>
     <string name="menu_spice_label">調味料</string>
     <string name="menu_bento_label">弁当</string>
+    <string name="menu_cart_label">カート</string>
+    <string name="menu_favorite_label">お気に入り</string>
+    <string name="menu_bought_label">購入したリスト</string>
     <string name="food_no_select_genre">ジャンルを選択してください</string>
 
     <!-- 質問投稿画面用文字列 -->
@@ -57,4 +62,28 @@
     <string name="delete_favorite_dialog_title">お気に入りの削除</string>
     <string name="delete_favorite_dialog_message">お気に入りを削除しますか？</string>
     <string name="empty_favorite">お気に入りはまだ登録されていません。</string>
+
+    <!-- Cart関連 -->
+    <string name="delete_cart_dialog_title">カートからアイテムの削除</string>
+    <string name="delete_cart_dialog_message">カートからアイテムを削除しますか？</string>
+    <string name="cart_favorite">カートはまだ登録されていません。</string>
+    <!-- 購入関連　-->
+    <string name="buy_button">注文</string>
+    <string name="receiver_name">受取人</string>
+    <string name="receiver_address">受取住所</string>
+    <string name="receiver_phone">受取電話番号</string>
+    <string name="card_number">カード番号</string>
+    <string name="card_password">暗証番号</string>
+    <string name="order_confirm">注文確認</string>
+    <string name="option_genkin">現金</string>
+    <string name="option_card">カード</string>
+    <string name="warning_buy">以上の全部情報を入力ください</string>
+    <!-- コメント追加関連　-->
+    <string name="comment_add">コメント追加</string>
+    <string name="comment_name">コメント内容</string>
+    <string name="comment_body">コメントを入力ください</string>
+    <string name="comment_button">追加</string>
+
+    <!--    <String name="genkin">現金</String>-->
+    <!--    <String name="card">カード</String>-->
 </resources>

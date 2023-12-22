@@ -4,12 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:padding="10dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="jp.techacademy.huyen.duong.shop_app.MainActivity">
-
-    <ListView
-        android:id="@+id/listView"
+    <RelativeLayout
+        android:id="@+id/RLSearch"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:background="@color/teal_200"
+        android:padding="10dp">
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/rounded_corner_search"
+            android:drawableStart="@drawable/ic_search"
+            android:hint="  Search Restaurants"
+            android:maxLines="1"
+            android:padding="5dp"
+            android:paddingStart="12dp" />
+        <TextView
+            android:id="@+id/txtTextview"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/rounded_corner_search"
+            android:hint="Cart hiiiiii"
+            android:maxLines="1"
+            android:padding="5dp"
+            android:paddingStart="12dp" />
+
+    </RelativeLayout>
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="680sp"
+            android:layout_marginTop="70sp"
+            android:layout_marginBottom="10sp" />
 </RelativeLayout>

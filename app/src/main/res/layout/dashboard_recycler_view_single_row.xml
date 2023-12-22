@@ -2,7 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="130dp"
+    android:layout_height="170dp"
     android:layout_margin="4dp"
     android:background="@color/white"
     app:cardCornerRadius="6dp">
@@ -33,7 +33,10 @@
                 android:id="@+id/txtRestaurantName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
                 android:padding="5dp"
                 android:text="Pind Tadka"
                 android:textColor="@color/black"
@@ -44,19 +47,32 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/txtRestaurantName"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="5dp"
                 android:layout_marginBottom="5dp"
                 android:drawableStart="@drawable/ic_money"
                 android:padding="6dp"
                 android:text="300/person"
                 android:textSize="14sp" />
+            <TextView
+                android:id="@+id/txtAddcomment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtPrice"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:drawableStart="@drawable/ic_add_comment"
+                android:padding="6dp"
+                android:textSize="14sp" />
+
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="10dp"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.1">
 
@@ -71,17 +87,42 @@
                 android:layout_marginBottom="5dp"
                 android:background="@drawable/ic_star"
                 android:tag="unliked" />
-
             <TextView
-                android:id="@+id/txtCart"
+                android:id="@+id/txtCartAdd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/txtFavorite"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="10dp"
                 android:drawablePadding="4dp"
                 android:padding="4dp"
-                android:background="@drawable/ic_shopping_cart"
+                android:background="@drawable/ic_add_shopping_cart"
+                android:textColor="#ffc107"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/txtCart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txtCartAdd"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:drawablePadding="4dp"
+                android:padding="4dp"
+                android:background="@drawable/ic_add_shopping_cart"
+                android:textColor="#ffc107"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/txtNumberCart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txtCart"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:drawablePadding="4dp"
+                android:padding="4dp"
+                android:text="0 Item"
                 android:textColor="#ffc107"
                 android:textSize="15sp"
                 android:textStyle="bold" />

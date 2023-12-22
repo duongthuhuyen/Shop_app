@@ -43,7 +43,7 @@ class RegisterActivity : AppCompatActivity() {
 //                val password = binding.passwordText.text.toString()
 //                val user = auth.currentUser
                 val userRef = databaseReference.child(UsersPATH).child(task.result.user!!.uid)
-                    // アカウント作成の時は表示名をFirebaseに保存する
+                // アカウント作成の時は表示名をFirebaseに保存する
                 val name = binding.etName.text.toString()
 
                 val data = HashMap<String, String>()

@@ -23,15 +23,24 @@
     <include
         android:id="@+id/inner"
         layout="@layout/content_main" />
+    <Button
+        android:id="@+id/btnBuy"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:text="@string/buy_button"
+        android:textSize="20sp"
+        android:textColor="@color/purple_500"
+        android:layout_marginBottom="5sp"
+        android:layout_height="50sp"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="16dp"
-        app:srcCompat="@drawable/plus"
-        tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck" />
+<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--        android:id="@+id/fab"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="bottom|end"-->
+<!--        android:layout_marginEnd="@dimen/fab_margin"-->
+<!--        android:layout_marginBottom="16dp"-->
+<!--        app:srcCompat="@drawable/plus"-->
+<!--        tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck" />-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.addCallback
 import androidx.preference.PreferenceManager
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.snackbar.Snackbar
@@ -26,6 +27,9 @@ class LoginActivity : AppCompatActivity() {
     private var isCreateAccount = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        onBackPressedDispatcher.addCallback(){
+            mainActivityBack()
+        }
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -43,12 +47,12 @@ class LoginActivity : AppCompatActivity() {
                 val userRef = databaseReference.child(UsersPATH).child(user!!.uid)
 
                 userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val data = snapshot.value as Map<*, *>?
-                            saveName(data!!["name"] as String)
-                        }
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val data = snapshot.value as Map<*, *>?
+                        saveName(data!!["name"] as String)
+                    }
 
-                        override fun onCancelled(firebaseError: DatabaseError) {}
+                    override fun onCancelled(firebaseError: DatabaseError) {}
                 })
 
                 // Activityを閉じる
@@ -100,5 +104,12 @@ class LoginActivity : AppCompatActivity() {
         val editor = sp.edit()
         editor.putString(NameKEY, name)
         editor.apply()
+    }
+
+    fun mainActivityBack() {
+        val intentSub = Intent()
+        intentSub.putExtra(KEY_RESULT_LOGIN, "OK")
+        setResult(RESULT_OK, intentSub)
+        finish()
     }
 }
