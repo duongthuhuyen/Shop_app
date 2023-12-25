@@ -77,25 +77,9 @@ class FoodDetailActivity : AppCompatActivity() {
         adapter = FoodDetailAdapter(this, food, genre)
         binding.listView.adapter = adapter
         adapter.notifyDataSetChanged()
-
-//        binding.fab.setOnClickListener {
-//            // ログイン済みのユーザーを取得する
-//            val user = FirebaseAuth.getInstance().currentUser
-//
-//            if (user == null) {
-//                // ログインしていなければログイン画面に遷移させる
-//                val intent = Intent(applicationContext, LoginActivity::class.java)
-//                startActivity(intent)
-//            } else {
-//                // Questionを渡して回答作成画面を起動する
-//                // --- ここから ---
-//                val intent = Intent(applicationContext, CommentSendActivity::class.java)
-//                intent.putExtra("food", food)
-//                intent.putExtra("genre", genre)
-//                startActivity(intent)
-//                // --- ここまで ---
-//            }
-//        }
+        binding.btnReturn.setOnClickListener() {
+            mainActivityBack()
+        }
 
         val dataBaseReference = FirebaseDatabase.getInstance().reference
         commentRef = dataBaseReference.child(FoodsPATH).child(genre.toString())

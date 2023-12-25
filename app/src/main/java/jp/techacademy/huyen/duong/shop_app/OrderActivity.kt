@@ -124,6 +124,8 @@ class OrderActivity : AppCompatActivity(), DatabaseReference.CompletionListener 
             ).show()
             Log.d("Database", "Error")
             statusReturn = "OK"
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
             //finish()
         } else {
             Snackbar.make(

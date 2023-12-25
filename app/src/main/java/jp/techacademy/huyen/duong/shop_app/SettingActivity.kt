@@ -3,6 +3,7 @@ package jp.techacademy.huyen.duong.shop_app
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.addCallback
 import androidx.activity.result.ActivityResult
@@ -54,6 +55,10 @@ class SettingActivity : AppCompatActivity() {
 
         // UIの初期設定
         title = getString(R.string.settings_title)
+        binding.txtReturn.setOnClickListener() {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
 
         binding.changeButton.setOnClickListener { v ->
             // キーボードが出ていたら閉じる
