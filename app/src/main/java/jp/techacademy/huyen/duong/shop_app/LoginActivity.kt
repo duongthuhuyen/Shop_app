@@ -78,14 +78,27 @@ class LoginActivity : AppCompatActivity() {
 
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
-
-            if (email.isNotEmpty() && password.length >= 6) {
-                login(email, password)
-            } else {
+            if (email.isEmpty() || password.isEmpty()) {
                 // エラーを表示する
-                Snackbar.make(v, getString(R.string.login_error_message), Snackbar.LENGTH_LONG)
+                Snackbar.make(v, "メールとパスワードを入力してください", Snackbar.LENGTH_LONG)
                     .show()
             }
+            if (!validateEmail(email)) {
+                Snackbar.make(v, "メール形式が間違ったので再度入力してください", Snackbar.LENGTH_LONG)
+                    .show()
+            }
+            if (password.length < 6) {
+                Snackbar.make(v, "６文字以上のパスワードを入力してください", Snackbar.LENGTH_LONG)
+                    .show()
+            }
+            if (email.isNotEmpty() && password.length >= 6 && validateEmail(email)) {
+                login(email, password)
+            }
+//            } else {
+//                // エラーを表示する
+//                Snackbar.make(v, getString(R.string.login_error_message), Snackbar.LENGTH_LONG)
+//                    .show()
+//            }
         }
         binding.txtSignUp.setOnClickListener {
             val intent = Intent(applicationContext, RegisterActivity::class.java)
@@ -111,5 +124,11 @@ class LoginActivity : AppCompatActivity() {
         intentSub.putExtra(KEY_RESULT_LOGIN, "OK")
         setResult(RESULT_OK, intentSub)
         finish()
+    }
+    companion object {
+        fun validateEmail(email: String) :Boolean{
+            val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$"
+            return email.matches(emailRegex.toRegex())
+        }
     }
 }

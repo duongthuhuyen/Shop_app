@@ -20,7 +20,7 @@
     <string name="create_account_title">アカウント登録</string>
     <string name="order_title">注文</string>
     <string name="create_account_failure_message">アカウント作成に失敗しました</string>
-    <string name="login_failure_message">ログインに失敗しました</string>
+    <string name="login_failure_message">メールまたはパスワードが間違ったので、チェックしてください</string>
     <string name="login_error_message">正しく入力してください</string>
     <!-- 設定画面用文字列 -->
     <string name="settings_title">設定</string>

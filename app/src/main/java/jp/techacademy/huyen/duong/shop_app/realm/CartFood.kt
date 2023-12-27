@@ -16,7 +16,7 @@ open class CartFood(
     number: Int,
     genre: Int
 ) :
-    RealmObject , java.io.Serializable{
+    RealmObject{
     @PrimaryKey
     var foodIdFirebase: String = ""
     var image: String = ""

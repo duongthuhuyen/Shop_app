@@ -75,17 +75,38 @@ class RegisterActivity : AppCompatActivity() {
             val password = binding.etPassword.text.toString()
             val name = binding.etName.text.toString()
             val confirmPassword = binding.etConfirmPassword.text.toString()
+            if (email.isEmpty() || password.isEmpty() || name.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                // エラーを表示する
+                Snackbar.make(v, getString(R.string.login_error_message), Snackbar.LENGTH_LONG)
+                    .show()
+            }
+            if (!LoginActivity.validateEmail(email)) {
+                // エラーを表示する
+                Snackbar.make(v, "メール形式が間違ったので再度入力してください", Snackbar.LENGTH_LONG)
+                    .show()
+            }
 
+            if (password.length < 6) {
+                // エラーを表示する
+                Snackbar.make(v, "パスワード文字数は６文字以上で入力してください", Snackbar.LENGTH_LONG)
+                    .show()
+            }
+            if (password != confirmPassword) {
+                // エラーを表示する
+                Snackbar.make(v, "再度パスワードはパスワーどと違ったので、再度入力してください", Snackbar.LENGTH_LONG)
+                    .show()
+            }
             if (email.isNotEmpty() && password.length >= 6 && name.isNotEmpty() && password == confirmPassword) {
                 // ログイン時に表示名を保存するようにフラグを立てる
                 isCreateAccount = true
 
                 createAccount(email, password)
-            } else {
-                // エラーを表示する
-                Snackbar.make(v, getString(R.string.login_error_message), Snackbar.LENGTH_LONG)
-                    .show()
             }
+//            else {
+//                // エラーを表示する
+//                Snackbar.make(v, getString(R.string.login_error_message), Snackbar.LENGTH_LONG)
+//                    .show()
+//            }
         }
     }
 
